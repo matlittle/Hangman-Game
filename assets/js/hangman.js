@@ -8,7 +8,7 @@ var hangmanGame = {
 		losses: 0,
 		wordToGuess: "",
 		displayWord: "",
-		alpha: [
+		alphabet: [
 			["A","B","C","D","E","F","G","H","I","J","K","L","M"],
 			["N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
 		],
@@ -26,11 +26,14 @@ var hangmanGame = {
 		// DO NOT USE "var". Excluding the var keyword will create Global variables
 		MaxGuesses = 6;
 
+		// get the game type
 		this.gameType();
-
+		// get a word
 		this.curr.wordToGuess = this.chooseWord();
-
+		// build the initial display word
 		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
+		// build the alphabet display
+		this.buildAlphaDisplay(this.curr.alphabet);
 
 	},
 	gameType: function() {
@@ -109,6 +112,30 @@ var hangmanGame = {
 
 			return this.curr.correctGuess;
 		}
+	},
+	buildAlphaDisplay: function(alphaArr) {
+		var alphabetDiv = document.getElementById("alphabet");
+
+		var table = document.createElement("table");
+		var tableBody = document.createElement("tbody");
+
+		alphaArr.forEach( function(rowData) {
+			var row = document.createElement("tr");
+
+			rowData.forEach(function(cellData) {
+				var cell = document.createElement("td");
+				cell.appendChild(document.createTextNode(cellData));
+				cell.id = "letter-"+cellData;
+				row.appendChild(cell);
+			});
+
+			tableBody.appendChild(row);
+		});
+
+		table.appendChild(tableBody);
+		alphabetDiv.appendChild(table);
+		
+		return true;
 	},
 	updateDisplay: function() {
 		// function to update display based on any changes
