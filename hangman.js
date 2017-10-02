@@ -1,23 +1,31 @@
+
+
+
 var hangmanGame = {
 	init: function() {
 		//function to initialize starting variables and display
 		// DO NOT USE "var". Excluding the var keyword will create Global variables
-		const MaxGuesses = 6;
+		MaxGuesses = 6;
 
 		this.gameType();
+
+		this.curr.wordToGuess = this.chooseWord();
+
+		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
+
 	},
 	gameType: function() {
 		// determines whether the game is vs computer or human
 		let typePrompt = confirm("Are you playing with another person?");
 		if(typePrompt) {
-			this.currentState.gameType = "vsHuman"
+			this.curr.gameType = "vsHuman"
 		} else {
-			this.currentState.gameType = "vsComputer";
+			this.curr.gameType = "vsComputer";
 		}
 
-		console.log("gameType function: " + this.currentState.gameType);
+		console.log("gameType function: " + this.curr.gameType);
 	},
-	currentState: {
+	curr: {
 		// object that keeps track of the game's state. 
 		gameType: "",
 		wins: 0,
@@ -29,21 +37,22 @@ var hangmanGame = {
 		missedGuesses: [], 
 		correctGuess: {
 			char: "",
-			positions: []
+			positions: [],
+			previous: []
 		}
 	},
 	chooseWord: function() {
 		// function to get word. Random if vs comp, input if pvp.
-		if(this.currentState.gameType === "vsComputer") {
-			// set random word length betweeen 3 and 12
-			let ranWordLen = (Math.floor(Math.random() * 10) + 3);
+		if(this.curr.gameType === "vsComputer") {
+			// set random word length betweeen 4 and 12
+			let ranWordLen = (Math.floor(Math.random() * 9) + 4);
 			// initialize new http request variable
 			let xhttpReq = new XMLHttpRequest();
 
 				/*	// function that runs when state of API call changes
 					xhttpReq.onReadyStateChange = function() {
 						if (this.readyState === 4 && this.status === 200) {
-							hangmanGame.currentState.wordToGuess = xhttpReq.responseText;
+							hangmanGame.curr.wordToGuess = xhttpReq.responseText;
 						}
 					};	*/
 
@@ -59,8 +68,8 @@ var hangmanGame = {
 			// ask player for input word
 			let playerWord = "";
 			do {
-				playerWord = prompt("Enter a word between 3 and 12 characters for the next game.");
-			} while (playerWord.length < 3 || playerWord.length > 12)
+				playerWord = prompt("Enter a word between 4 and 12 characters for the next game.");
+			} while (playerWord.length < 4 || playerWord.length > 12)
 
 			return playerWord;
 		}
@@ -76,26 +85,26 @@ var hangmanGame = {
 	},
 	checkGuess: function(guess) {
 		// function that's called when a user makes a guess
-		if(this.currentState.wordToGuess.indexOf(guess) === -1) {
+		if(this.curr.wordToGuess.indexOf(guess) === -1) {
 			// if incorrect guess, increment incorrect guesses by 1
-			this.currentState.numGuesses += 1;
+			this.curr.numGuesses += 1;
 			// add incorrect guess to missed guesses array
-			this.currentState.missedGuesses.push(guess);
+			this.curr.missedGuesses.push(guess);
 			return false;
 		} else {
 			// set return obj array to empty array
-			this.currentState.correctGuess.positions = [];
+			this.curr.correctGuess.positions = [];
 			// loop through correct word, building array of correct index locations
-			for(i=0; i < this.currentState.wordToGuess.length; i+=1){
-				if(guess === this.currentState.wordToGuess[i]){
+			for(i=0; i < this.curr.wordToGuess.length; i+=1){
+				if(guess === this.curr.wordToGuess[i]){
 				// add location of correct guess to obj index array
-				this.currentState.correctGuess.positions.push(i);
+				this.curr.correctGuess.positions.push(i);
 				}
 			}
 
-			this.currentState.correctGuess.char = guess;
+			this.curr.correctGuess.char = guess;
 
-			return this.currentState.correctGuess;
+			return this.curr.correctGuess;
 		}
 	},
 	updateDisplay: function() {
@@ -124,13 +133,9 @@ document.onkeyup = function(event) {
 
 hangmanGame.init();
 
-console.log(hangmanGame.currentState);
+console.log(hangmanGame.curr);
 
-hangmanGame.currentState.wordToGuess = hangmanGame.chooseWord();
-
-hangmanGame.currentState.displayWord = hangmanGame.initDisplayWord(hangmanGame.currentState.wordToGuess);
-
-console.log(hangmanGame.currentState.wordToGuess);
+console.log(hangmanGame.curr.wordToGuess);
 
 
 
