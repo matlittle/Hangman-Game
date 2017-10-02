@@ -38,8 +38,8 @@ var hangmanGame = {
 			let ranWordLen = (Math.floor(Math.random() * 10) + 3);
 			// initialize new http request variable
 			let xhttpReq = new XMLHttpRequest();
-			// configure GET request from random word generator. Async call.
-			xhttpReq.open("GET", "http://randomword.setgetgo.com/get.php?Id=matlittle&Name=matlittle&Value=matlittle&len=" + ranWordLen.toString(), false);
+			// configure GET request from random word generator.
+			xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=" + ranWordLen.toString(), true);
 			// make web service call
 			xhttpReq.send();
 			// return random word
