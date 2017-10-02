@@ -65,36 +65,61 @@ var hangmanGame = {
 			return playerWord;
 		}
 	},
-	checkGuess: function() {
+	initDisplayWord: function(word) {
+		let tempWord = "";
+
+		for (var i = 0; i < word.length; i++) {
+			tempWord += "_";
+		}
+
+		return tempWord;
+	},
+	checkGuess: function(guess) {
 		// function that's called when a user makes a guess
-		if(wordToGuess.indexOf(guess) === -1) {
+		if(this.currentState.wordToGuess.indexOf(guess) === -1) {
 			// if incorrect guess, increment incorrect guesses by 1
-			numGuesses += 1;
+			this.currentState.numGuesses += 1;
 			// add incorrect guess to missed guesses array
-			missedGuesses.push(guess);
+			this.currentState.missedGuesses.push(guess);
 			return false;
 		} else {
 			// set return obj array to empty array
-			correctGuess.index = [];
+			this.currentState.correctGuess.positions = [];
 			// loop through correct word, building array of correct index locations
-			for(i=0; i < wordToGuess.length; i+=1){
-				if(guess === wordToGuess[i]){
+			for(i=0; i < this.currentState.wordToGuess.length; i+=1){
+				if(guess === this.currentState.wordToGuess[i]){
 				// add location of correct guess to obj index array
-				correctGuess.index.push(i);
+				this.currentState.correctGuess.positions.push(i);
 				}
 			}
 
-			correctGuess.char = guess;
+			this.currentState.correctGuess.char = guess;
 
-			return correctGuess;
+			return this.currentState.correctGuess;
 		}
 	},
 	updateDisplay: function() {
 		// function to update display based on any changes
 		return true;
 	}
-}
+};
 
+
+document.onkeyup = function(event) {
+	userGuess = event.key;
+
+	console.log(userGuess);
+
+	console.log(hangmanGame.checkGuess(userGuess));
+
+	if(hangmanGame.checkGuess(userGuess)) {
+		//guess was wrong
+		console.log("correct guess");
+	} else {
+		//guess was correct
+		console.log("wrong guess");
+	}
+};
 
 
 hangmanGame.init();
@@ -103,25 +128,9 @@ console.log(hangmanGame.currentState);
 
 hangmanGame.currentState.wordToGuess = hangmanGame.chooseWord();
 
+hangmanGame.currentState.displayWord = hangmanGame.initDisplayWord(hangmanGame.currentState.wordToGuess);
+
 console.log(hangmanGame.currentState.wordToGuess);
 
 
 
-document.onkeyup = function(event) {
-	userGuess = event.key;
-
-	console.log(userGuess);
-
-/*
-	console.log(checkGuess(userGuess));
-
-	if(!checkGuess(userGuess)) {
-		//guess was wrong
-		console.log("wrong guess");
-	} else {
-		//guess was correct
-		console.log("correct guess");
-	}
-*/
-
-};
