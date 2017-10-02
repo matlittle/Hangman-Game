@@ -23,6 +23,7 @@ var hangmanGame = {
 		wins: 0,
 		losses: 0,
 		wordToGuess: "",
+		displayWord: "",
 		numGuesses: 0,
 		currGuess: "",
 		missedGuesses: [], 
@@ -38,11 +39,20 @@ var hangmanGame = {
 			let ranWordLen = (Math.floor(Math.random() * 10) + 3);
 			// initialize new http request variable
 			let xhttpReq = new XMLHttpRequest();
+
+				/*	// function that runs when state of API call changes
+					xhttpReq.onReadyStateChange = function() {
+						if (this.readyState === 4 && this.status === 200) {
+							hangmanGame.currentState.wordToGuess = xhttpReq.responseText;
+						}
+					};	*/
+
 			// configure GET request from random word generator.
-			xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=" + ranWordLen.toString(), true);
+			xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=" + 
+							ranWordLen.toString(), false);
 			// make web service call
 			xhttpReq.send();
-			// return random word
+
 			return xhttpReq.responseText;
 
 		} else {
@@ -50,7 +60,7 @@ var hangmanGame = {
 			let playerWord = "";
 			do {
 				playerWord = prompt("Enter a word between 3 and 12 characters for the next game.");
-			} while (playerWord.length < 3 || playerWord.length > 15)
+			} while (playerWord.length < 3 || playerWord.length > 12)
 
 			return playerWord;
 		}
