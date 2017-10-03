@@ -1,18 +1,17 @@
-const Settings = {
-	Alphabet: [
-		["A","B","C","D","E","F","G"],
-		["H","I","J","K","L","M","N"],
-		["O","P","Q","R","S","T","U"],
-		["V","W","X","Y","Z"]
-	],
-	MaxGuesses: 6,
-	WordToGuessP: document.getElementById("wordToGuess"),
-	AlphabetDiv: document.getElementById("alphabet")
-};
-
-Object.freeze(Settings);
-
 var hangmanGame = {
+	Settings: {
+		// constant game settings
+		Alphabet: [
+			["A","B","C","D","E","F","G"],
+			["H","I","J","K","L","M","N"],
+			["O","P","Q","R","S","T","U"],
+			["V","W","X","Y","Z"]
+		],
+		MaxGuesses: 6,
+		WordElement: document.getElementById("wordToGuess"),
+		AlphabetDiv: document.getElementById("alphabet")
+	},
+
 	curr: {
 		// object that keeps track of the game's state. 
 		gameType: "",
@@ -31,17 +30,35 @@ var hangmanGame = {
 	},
 
 	init: function() {
+		// freeze Settings obj so no changes can be made
+		Object.freeze(this.Settings);
+
 		// get the game type
 		this.gameType();
 		// get a word
 		this.curr.wordToGuess = this.chooseWord();
+
 		// build the initial display word
 		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
+		// append the display word to its html element
+		this.Settings.WordElement.appendChild(document.createTextNode(this.curr.displayWord));
 
 		// build the alphabet display
-		this.buildAlphaDisplay(Settings.Alphabet);
-		//update display
-		this.updateDisplay();
+		this.buildAlphaDisplay(this.Settings.Alphabet);
+
+		// add click event listener for alphabet letter elements
+		var letterElements = document.getElementsByClassName("letter");
+		console.log(letterElements);
+		console.log(letterElements.length);
+		console.log(letterElements[0]);
+
+		letterElements[0].addEventListener("click", hangmanGame.letterClicked(event));
+
+
+		/*letterElements.forEach(function(element) {
+			element.addEventListener("click", hangmanGame.letterClicked());
+		});*/
+
 	},
 
 	gameType: function() {
@@ -115,9 +132,13 @@ var hangmanGame = {
 		});
 
 		// append fully constructed table to alphabet div
-		Settings.AlphabetDiv.appendChild(table);
+		this.Settings.AlphabetDiv.appendChild(table);
+	},
 
-		return true;
+	letterClicked: function(event) {
+		console.log(event.target);
+		console.log(event.target.innerHTML);
+
 	},
 
 	checkGuess: function(guess) {
@@ -145,12 +166,15 @@ var hangmanGame = {
 	},
 
 	updateDisplayWord: function(obj) {
+		//function gets passed this.curr.correctGuess obj
+		let tempWord = hangmanGame.curr.displayWord;
 		// go through each correct position
 		obj.positions.forEach(function(index) {
 			// update display word with correct character
-			hangmanGame.curr.displayWord[index] = obj.char;
-
+			tempWord = tempWord.substring(0, index) + obj.char + tempWord.substring(index+1);
 		});
+
+		hangmanGame.curr.displayWord = tempWord;
 	},
 
 	updateDisplay: function() {
@@ -159,7 +183,7 @@ var hangmanGame = {
 		// update displayed image
 		//code;
 		// update displayed word
-		Settings.WordToGuessP.appendChild(document.createTextNode(this.curr.displayWord));
+		this.Settings.WordElement.innerHTML = this.curr.displayWord;
 		// update alphabet
 		//code;
 	}
@@ -172,7 +196,8 @@ window.onload = function() {
 
 	console.log(hangmanGame.curr.wordToGuess);
 
-	document.onclick = function(event) {
+
+/*	document.onclick = function(event) {
 
 		console.log(event.target);
 		console.log(event.target.className);
@@ -207,7 +232,7 @@ window.onload = function() {
 			return;
 		}
 
-	}
+	}	*/
 
 }
 

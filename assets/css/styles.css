@@ -25,10 +25,12 @@ div {
 }
 
 .correct {
-	color: green;
+	background-color: green;
+	color: white;
 }
 
 .wrong {
 	text-decoration: line-through;
-	color: red;
+	background-color: red;
+	color: white;
 }
