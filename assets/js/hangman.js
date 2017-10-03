@@ -48,11 +48,9 @@ var hangmanGame = {
 
 		// add click event listener for alphabet letter elements
 		var letterElements = document.getElementsByClassName("letter");
-		console.log(letterElements);
-		console.log(letterElements.length);
-		console.log(letterElements[0]);
-
-		letterElements[0].addEventListener("click", hangmanGame.letterClicked(event));
+		for(var i = 0; i < letterElements.length; i += 1) {
+			letterElements[i].addEventListener("click", hangmanGame.letterClicked);
+		}
 
 
 		/*letterElements.forEach(function(element) {
@@ -139,6 +137,31 @@ var hangmanGame = {
 		console.log(event.target);
 		console.log(event.target.innerHTML);
 
+
+
+		hangmanGame.curr.currentGuess = event.target.innerHTML;
+		// if guess is correct
+		if(hangmanGame.checkGuess(hangmanGame.curr.currentGuess)) {
+			// set class of clicked element to correct
+			event.target.className = "correct";
+			// update display word with correctly guessed character
+			hangmanGame.updateDisplayWord(hangmanGame.curr.correctGuess);
+			// update display elements
+			hangmanGame.updateDisplay();
+
+			console.log(hangmanGame.curr.numGuesses);
+
+		} else {
+			// set class of clicked element to wrong
+			event.target.className = "wrong";
+			// update display elements
+			hangmanGame.updateDisplay();
+
+			console.log(hangmanGame.curr.numGuesses);
+		}
+		return;
+
+
 	},
 
 	checkGuess: function(guess) {
@@ -197,7 +220,7 @@ window.onload = function() {
 	console.log(hangmanGame.curr.wordToGuess);
 
 
-/*	document.onclick = function(event) {
+	document.onclick = function(event) {
 
 		console.log(event.target);
 		console.log(event.target.className);
@@ -232,7 +255,7 @@ window.onload = function() {
 			return;
 		}
 
-	}	*/
+	}	
 
 }
 
