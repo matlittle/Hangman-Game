@@ -4,9 +4,14 @@ div {
 	border: 2px solid black;
 }
 
+#gameImg {
+	text-align: center;
+}
+
 #alphabet > table{
 	margin: auto;
 	width: 90%;
+	border-collapse: collapse;
 }
 
 #alphabet > table > tr > td {
@@ -14,14 +19,17 @@ div {
 	text-align: center;
 	font-size: 1.25em;
 	font-weight: bold;
-	padding: 10px 5px;
+	padding: 5px;
+	border: 1px solid black;
 }
 
 #wordToGuess {
 	font-size: 2em;
 	line-height: 2em;
 	letter-spacing: 1.1em;
+	text-indent: 1.1em;
 	text-align: center;
+	display: block;
 }
 
 .correct {
@@ -30,7 +38,6 @@ div {
 }
 
 .wrong {
-	text-decoration: line-through;
 	background-color: red;
 	color: white;
 }

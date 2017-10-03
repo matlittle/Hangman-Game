@@ -21,7 +21,6 @@ var hangmanGame = {
 		displayWord: "",
 		numGuesses: 0,
 		currGuess: "",
-		missedGuesses: [], 
 		correctGuess: {
 			char: "",
 			positions: [],
@@ -46,16 +45,12 @@ var hangmanGame = {
 		// build the alphabet display
 		this.buildAlphaDisplay(this.Settings.Alphabet);
 
-		// add click event listener for alphabet letter elements
+		// add click event listener to alphabet letter elements
 		var letterElements = document.getElementsByClassName("letter");
+		console.log(letterElements);
 		for(var i = 0; i < letterElements.length; i += 1) {
 			letterElements[i].addEventListener("click", hangmanGame.letterClicked);
 		}
-
-
-		/*letterElements.forEach(function(element) {
-			element.addEventListener("click", hangmanGame.letterClicked());
-		});*/
 
 	},
 
@@ -134,14 +129,13 @@ var hangmanGame = {
 	},
 
 	letterClicked: function(event) {
-		console.log(event.target);
-		console.log(event.target.innerHTML);
-
-
-
+		// set current guess to value of clicked letter
 		hangmanGame.curr.currentGuess = event.target.innerHTML;
+
 		// if guess is correct
 		if(hangmanGame.checkGuess(hangmanGame.curr.currentGuess)) {
+			// remove click event listener from element
+			event.target.removeEventListener("click", hangmanGame.letterClicked);
 			// set class of clicked element to correct
 			event.target.className = "correct";
 			// update display word with correctly guessed character
@@ -152,6 +146,8 @@ var hangmanGame = {
 			console.log(hangmanGame.curr.numGuesses);
 
 		} else {
+			// remove click event listener from element
+			event.target.removeEventListener("click", hangmanGame.letterClicked);
 			// set class of clicked element to wrong
 			event.target.className = "wrong";
 			// update display elements
@@ -167,10 +163,8 @@ var hangmanGame = {
 	checkGuess: function(guess) {
 		// function that's called when a user makes a guess
 		if(this.curr.wordToGuess.indexOf(guess) === -1) {
-			// if incorrect guess, increment incorrect guesses by 1
+			// incorrect guess, increment incorrect guesses by 1
 			this.curr.numGuesses += 1;
-			// add incorrect guess to missed guesses array
-			this.curr.missedGuesses.push(guess);
 			return false;
 		} else {
 			// set return obj array to empty array
@@ -220,7 +214,7 @@ window.onload = function() {
 	console.log(hangmanGame.curr.wordToGuess);
 
 
-	document.onclick = function(event) {
+	/*document.onclick = function(event) {
 
 		console.log(event.target);
 		console.log(event.target.className);
@@ -255,7 +249,7 @@ window.onload = function() {
 			return;
 		}
 
-	}	
+	}	*/
 
 }
 
