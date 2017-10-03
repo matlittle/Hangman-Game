@@ -1,4 +1,16 @@
+const Settings = {
+	Alphabet: [
+		["A","B","C","D","E","F","G"],
+		["H","I","J","K","L","M","N"],
+		["O","P","Q","R","S","T","U"],
+		["V","W","X","Y","Z"]
+	],
+	MaxGuesses: 6,
+	WordToGuessP: document.getElementById("wordToGuess"),
+	AlphabetDiv: document.getElementById("alphabet")
+};
 
+Object.freeze(Settings);
 
 var hangmanGame = {
 	curr: {
@@ -8,10 +20,6 @@ var hangmanGame = {
 		losses: 0,
 		wordToGuess: "",
 		displayWord: "",
-		alphabet: [
-			["A","B","C","D","E","F","G","H","I","J","K","L","M"],
-			["N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
-		],
 		numGuesses: 0,
 		currGuess: "",
 		missedGuesses: [], 
@@ -21,24 +29,25 @@ var hangmanGame = {
 			previous: []
 		}
 	},
-	init: function() {
-		//function to initialize starting variables and display
-		// DO NOT USE "var". Excluding the var keyword will create Global variables
-		MaxGuesses = 6;
 
+	init: function() {
 		// get the game type
 		this.gameType();
 		// get a word
 		this.curr.wordToGuess = this.chooseWord();
 		// build the initial display word
 		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
-		// build the alphabet display
-		this.buildAlphaDisplay(this.curr.alphabet);
 
+		// build the alphabet display
+		this.buildAlphaDisplay(Settings.Alphabet);
+		//update display
+		this.updateDisplay();
 	},
+
 	gameType: function() {
 		// determines whether the game is vs computer or human
-		let typePrompt = confirm("Are you playing with another person?");
+		// let typePrompt = confirm("Are you playing with another person?");
+		let typePrompt = false; // <-------------------------------------- Just false for testing purposes
 		if(typePrompt) {
 			this.curr.gameType = "vsHuman"
 		} else {
@@ -47,6 +56,7 @@ var hangmanGame = {
 
 		console.log("gameType function: " + this.curr.gameType);
 	},
+
 	chooseWord: function() {
 		// function to get word. Random if vs comp, input if pvp.
 		if(this.curr.gameType === "vsComputer") {
@@ -55,20 +65,13 @@ var hangmanGame = {
 			// initialize new http request variable
 			let xhttpReq = new XMLHttpRequest();
 
-				/*	// function that runs when state of API call changes
-					xhttpReq.onReadyStateChange = function() {
-						if (this.readyState === 4 && this.status === 200) {
-							hangmanGame.curr.wordToGuess = xhttpReq.responseText;
-						}
-					};	*/
-
 			// configure GET request from random word generator.
 			xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=" + 
-							ranWordLen.toString(), false);
+				ranWordLen.toString(), false);
 			// make web service call
 			xhttpReq.send();
 
-			return xhttpReq.responseText;
+			return xhttpReq.responseText.toUpperCase();
 
 		} else {
 			// ask player for input word
@@ -77,9 +80,10 @@ var hangmanGame = {
 				playerWord = prompt("Enter a word between 4 and 12 characters for the next game.");
 			} while (playerWord.length < 4 || playerWord.length > 12)
 
-			return playerWord;
+			return playerWord.toUpperCase;
 		}
 	},
+
 	initDisplayWord: function(word) {
 		let tempWord = "";
 
@@ -89,6 +93,33 @@ var hangmanGame = {
 
 		return tempWord;
 	},
+
+	buildAlphaDisplay: function(alphaArr) {
+		var table = document.createElement("table");
+
+		// loop through each main element in alphabet array
+		alphaArr.forEach( function(rowData) {
+			var row = document.createElement("tr");
+			// loop through each sub array of alphabet array
+			rowData.forEach(function(cellData) {
+				var cell = document.createElement("td");
+				// assign element of sub array to individual td element
+				cell.appendChild(document.createTextNode(cellData));
+				// set class of td elements
+				cell.className = "letter";
+				// append td element to the row
+				row.appendChild(cell);
+			});
+			// append the row to the table
+			table.appendChild(row);
+		});
+
+		// append fully constructed table to alphabet div
+		Settings.AlphabetDiv.appendChild(table);
+
+		return true;
+	},
+
 	checkGuess: function(guess) {
 		// function that's called when a user makes a guess
 		if(this.curr.wordToGuess.indexOf(guess) === -1) {
@@ -103,69 +134,82 @@ var hangmanGame = {
 			// loop through correct word, building array of correct index locations
 			for(var i = 0; i < this.curr.wordToGuess.length; i += 1){
 				if(guess === this.curr.wordToGuess[i]){
-				// add location of correct guess to obj index array
-				this.curr.correctGuess.positions.push(i);
+					// add location of correct guess to obj index array
+					this.curr.correctGuess.positions.push(i);
 				}
 			}
-
+			// add correct character to correct guess obj
 			this.curr.correctGuess.char = guess;
-
-			return this.curr.correctGuess;
+			return true;
 		}
 	},
-	buildAlphaDisplay: function(alphaArr) {
-		var alphabetDiv = document.getElementById("alphabet");
 
-		var table = document.createElement("table");
-		var tableBody = document.createElement("tbody");
+	updateDisplayWord: function(obj) {
+		// go through each correct position
+		obj.positions.forEach(function(index) {
+			// update display word with correct character
+			hangmanGame.curr.displayWord[index] = obj.char;
 
-		alphaArr.forEach( function(rowData) {
-			var row = document.createElement("tr");
-
-			rowData.forEach(function(cellData) {
-				var cell = document.createElement("td");
-				cell.appendChild(document.createTextNode(cellData));
-				cell.id = "letter-"+cellData;
-				row.appendChild(cell);
-			});
-
-			tableBody.appendChild(row);
 		});
-
-		table.appendChild(tableBody);
-		alphabetDiv.appendChild(table);
-		
-		return true;
 	},
+
 	updateDisplay: function() {
 		// function to update display based on any changes
-		return true;
+
+		// update displayed image
+		//code;
+		// update displayed word
+		Settings.WordToGuessP.appendChild(document.createTextNode(this.curr.displayWord));
+		// update alphabet
+		//code;
 	}
 };
 
 
-document.onkeyup = function(event) {
-	userGuess = event.key;
+window.onload = function() {
 
-	console.log(userGuess);
+	hangmanGame.init();
 
-	console.log(hangmanGame.checkGuess(userGuess));
+	console.log(hangmanGame.curr.wordToGuess);
 
-	if(hangmanGame.checkGuess(userGuess)) {
-		//guess was wrong
-		console.log("correct guess");
-	} else {
-		//guess was correct
-		console.log("wrong guess");
+	document.onclick = function(event) {
+
+		console.log(event.target);
+		console.log(event.target.className);
+
+		// if the class is letter for the clicked element
+		if(event.target.className === "letter") {
+			// set current guess to clicked elements value
+			hangmanGame.curr.currentGuess = event.target.innerHTML;
+			// if guess is correct
+			if(hangmanGame.checkGuess(hangmanGame.curr.currentGuess)) {
+				// set class of clicked element to correct
+				event.target.className = "correct";
+				// update display word with correctly guessed character
+				hangmanGame.updateDisplayWord(hangmanGame.curr.correctGuess);
+				// update display elements
+				hangmanGame.updateDisplay();
+
+				console.log(hangmanGame.curr.numGuesses);
+
+			} else {
+				// set class of clicked element to wrong
+				event.target.className = "wrong";
+				// update display elements
+				hangmanGame.updateDisplay();
+
+				console.log(hangmanGame.curr.numGuesses);
+			}
+			return;
+
+		// if the target element does not have a class of letter, do nothing
+		} else {
+			return;
+		}
+
 	}
-};
 
-
-hangmanGame.init();
-
-console.log(hangmanGame.curr);
-
-console.log(hangmanGame.curr.wordToGuess);
+}
 
 
 

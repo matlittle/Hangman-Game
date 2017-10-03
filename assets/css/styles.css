@@ -1,5 +1,34 @@
- div {
- 	padding: 10px;
- 	margin: 10px;
- 	border: 2px solid black;
- }
+div {
+	padding: 10px 0px;
+	margin: 10px 0px;
+	border: 2px solid black;
+}
+
+#alphabet > table{
+	margin: auto;
+	width: 90%;
+}
+
+#alphabet > table > tr > td {
+	width: 10%;
+	text-align: center;
+	font-size: 1.25em;
+	font-weight: bold;
+	padding: 10px 5px;
+}
+
+#wordToGuess {
+	font-size: 2em;
+	line-height: 2em;
+	letter-spacing: 1.1em;
+	text-align: center;
+}
+
+.correct {
+	color: green;
+}
+
+.wrong {
+	text-decoration: line-through;
+	color: red;
+}
