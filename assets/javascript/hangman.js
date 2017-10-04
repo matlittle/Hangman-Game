@@ -127,7 +127,7 @@ var hangmanGame = {
 				cell.appendChild(document.createTextNode(cellData));
 				// set class and id of td elements
 				cell.className = "letter";
-				cell.id = cellData;
+				cell.id = `char-${cellData}`;
 				// append td element to the row
 				row.appendChild(cell);
 			});
@@ -212,6 +212,9 @@ var hangmanGame = {
 	},
 
 	updateCorrectGuess: function(char) {
+		// add correct character to correct guess obj
+		this.curr.correctGuess.char = char;
+
 		// set return obj array to empty array
 		this.curr.correctGuess.positions = [];
 		// loop through correct word, building array of correct index locations
@@ -221,8 +224,6 @@ var hangmanGame = {
 				this.curr.correctGuess.positions.push(i);
 			}
 		}
-		// add correct character to correct guess obj
-		this.curr.correctGuess.char = guess;
 	}, 
 
 	updateDisplayWord: function(obj) {
