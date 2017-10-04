@@ -34,13 +34,12 @@ var hangmanGame = {
 
 		// get the game type
 		this.gameType();
+
 		// get a word
 		this.curr.wordToGuess = this.chooseWord();
 
 		// build the initial display word
 		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
-		// append the display word to its html element
-		this.Settings.WordElement.appendChild(document.createTextNode(this.curr.displayWord));
 
 		// build the alphabet display
 		this.buildAlphaDisplay(this.Settings.Alphabet);
@@ -95,7 +94,7 @@ var hangmanGame = {
 		var xhttpReq = new XMLHttpRequest();
 
 		// configure GET request from random word generator.
-		xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=${ranWordLen.toString()}", false);
+		xhttpReq.open("GET", `http://randomword.setgetgo.com/randomword/get.php?len=${ranWordLen.toString()}`, false);
 		// make web service call
 		xhttpReq.send();
 
@@ -108,6 +107,9 @@ var hangmanGame = {
 		for (var i = 0; i < word.length; i += 1) {
 			tempWord += "_";
 		}
+
+		// append the display word to its html element
+		this.Settings.WordElement.appendChild(document.createTextNode(tempWord));
 
 		return tempWord;
 	},
@@ -123,8 +125,9 @@ var hangmanGame = {
 				var cell = document.createElement("td");
 				// assign element of sub array to individual td element
 				cell.appendChild(document.createTextNode(cellData));
-				// set class of td elements
+				// set class and id of td elements
 				cell.className = "letter";
+				cell.id = cellData;
 				// append td element to the row
 				row.appendChild(cell);
 			});
