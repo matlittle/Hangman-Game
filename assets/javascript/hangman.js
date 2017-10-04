@@ -46,8 +46,8 @@ var hangmanGame = {
 
 		// add click event listener to alphabet letter elements
 		this.createClickListeners();
-		
 
+		document.onkeyup = this.letterPressed;
 	},
 
 	gameType: function() {
@@ -142,13 +142,15 @@ var hangmanGame = {
 	},
 
 	letterClicked: function(event) {
+		var keyClicked = event.target.innerHTML.toUpperCase();
+
 		// set current guess to value of clicked letter
-		hangmanGame.curr.currentGuess = event.target.innerHTML;
+		hangmanGame.curr.currentGuess = keyClicked;
+		//remove character's click listener
+		hangmanGame.removeClickListener(keyClicked);
 
 		// if guess is correct
 		if(hangmanGame.checkGuess(hangmanGame.curr.currentGuess)) {
-			// remove click event listener from element
-			event.target.removeEventListener("click", hangmanGame.letterClicked);
 			// set class of clicked element to correct
 			event.target.className = "correct";
 			// update display word with correctly guessed character
@@ -159,8 +161,6 @@ var hangmanGame = {
 			console.log(hangmanGame.curr.numGuesses);
 
 		} else {
-			// remove click event listener from element
-			event.target.removeEventListener("click", hangmanGame.letterClicked);
 			// set class of clicked element to wrong
 			event.target.className = "wrong";
 			// update display elements
@@ -172,55 +172,55 @@ var hangmanGame = {
 	},
 
 	letterPressed: function(event) {
-		var keyPressed = event.key
+		var keyPressed = event.key.toUpperCase();
+
+		console.log(keyPressed);
+
+		if(keyPressed === /^[A-Z]+$/) {
+			return;
+		}
+
 		// set current guess to value of pressed character
 		hangmanGame.curr.currentGuess = keyPressed;
 		//remove character's click listener
-		removeClickListener(keyPressed);
+		hangmanGame.removeClickListener(keyPressed);
 
 		// if guess is correct
-		if(hangmanGame.checkGuess(hangmanGame.curr.currentGuess)) {
-			// remove click event listener from element
-			event.target.removeEventListener("click", hangmanGame.letterClicked);
-			// set class of clicked element to correct
-			event.target.className = "correct";
-			// update display word with correctly guessed character
-			hangmanGame.updateDisplayWord(hangmanGame.curr.correctGuess);
-			// update display elements
-			hangmanGame.updateDisplay();
-
-			console.log(hangmanGame.curr.numGuesses);
-
+		if(hangmanGame.checkGuess(keyPressed)) {
+			hangmanGame.updateCorrectGuess(keyPressed);
 		} else {
-			// remove click event listener from element
-			event.target.removeEventListener("click", hangmanGame.letterClicked);
-			// set class of clicked element to wrong
-			event.target.className = "wrong";
-			// update display elements
-			hangmanGame.updateDisplay();
-
-			console.log(hangmanGame.curr.numGuesses);
+			hangmanGame.updateWrongGuess(keyPressed);
 		}
 		return;
 	},
 
 	removeClickListener: function(char) {
 		// get DOM element of guessed letter
-		charElement = document.getElementById(`char-${char}`);
+		var charElement = this.getCharElement(char);
 		// remove click listener from element
-		charElement.removeEventListener("click", hangmanGame.letterClicked);
-	}
+		charElement.removeEventListener("click", this.letterClicked);
+	},
+
+	getCharElement: function(char) {
+		// 
+		return document.getElementById(`char-${char}`);
+	},
 
 	checkGuess: function(guess) {
-		// function that's called when a user makes a guess
 		if(this.curr.wordToGuess.indexOf(guess) === -1) {
-			// incorrect guess, increment incorrect guesses by 1
-			this.curr.numGuesses += 1;
 			return false;
 		} else {
-			this.updateCorrectGuess(guess);
 			return true;
 		}
+	},
+
+	updateWrongGuess: function(char){
+		// incorrect guess, increment incorrect guesses by 1
+		this.curr.numGuesses += 1;
+		// change letter element class to wrong
+		var charElement = this.getCharElement(char);
+		charElement.className = "wrong";
+		this.updateDisplay();
 	},
 
 	updateCorrectGuess: function(char) {
@@ -236,6 +236,13 @@ var hangmanGame = {
 				this.curr.correctGuess.positions.push(i);
 			}
 		}
+
+		var charElement = this.getCharElement(char);
+		charElement.className = "correct";
+		this.updateDisplay();
+
+		// update display word with correctly guessed character
+		hangmanGame.updateDisplayWord(hangmanGame.curr.correctGuess);
 	}, 
 
 	updateDisplayWord: function(obj) {
@@ -266,11 +273,6 @@ var hangmanGame = {
 window.onload = function() {
 
 	hangmanGame.init();
-
-	document.onkeyup = hangmanGame.letterPressed();
-
-	console.log(hangmanGame.curr.wordToGuess);
-
 
 }
 
