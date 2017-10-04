@@ -45,10 +45,8 @@ var hangmanGame = {
 		this.buildAlphaDisplay(this.Settings.Alphabet);
 
 		// add click event listener to alphabet letter elements
-		var letterElements = document.getElementsByClassName("letter");
-		for(var i = 0; i < letterElements.length; i += 1) {
-			letterElements[i].addEventListener("click", hangmanGame.letterClicked);
-		}
+		this.createClickListeners();
+		
 
 	},
 
@@ -61,8 +59,6 @@ var hangmanGame = {
 		} else {
 			this.curr.gameType = "vsComputer";
 		}
-
-		console.log("gameType function: " + this.curr.gameType);
 	},
 
 	chooseWord: function() {
@@ -92,7 +88,6 @@ var hangmanGame = {
 		var ranWordLen = (Math.floor(Math.random() * 9) + 4);
 		// initialize new http request variable
 		var xhttpReq = new XMLHttpRequest();
-
 		// configure GET request from random word generator.
 		xhttpReq.open("GET", `http://randomword.setgetgo.com/randomword/get.php?len=${ranWordLen.toString()}`, false);
 		// make web service call
@@ -139,6 +134,13 @@ var hangmanGame = {
 		this.Settings.AlphabetDiv.appendChild(table);
 	},
 
+	createClickListeners: function() {
+		var letterElements = document.getElementsByClassName("letter");
+		for(var i = 0; i < letterElements.length; i += 1) {
+			letterElements[i].addEventListener("click", hangmanGame.letterClicked);
+		}
+	},
+
 	letterClicked: function(event) {
 		// set current guess to value of clicked letter
 		hangmanGame.curr.currentGuess = event.target.innerHTML;
@@ -170,8 +172,11 @@ var hangmanGame = {
 	},
 
 	letterPressed: function(event) {
-		// set current guess to value of clicked letter
-		hangmanGame.curr.currentGuess = event.key;
+		var keyPressed = event.key
+		// set current guess to value of pressed character
+		hangmanGame.curr.currentGuess = keyPressed;
+		//remove character's click listener
+		removeClickListener(keyPressed);
 
 		// if guess is correct
 		if(hangmanGame.checkGuess(hangmanGame.curr.currentGuess)) {
@@ -198,6 +203,13 @@ var hangmanGame = {
 		}
 		return;
 	},
+
+	removeClickListener: function(char) {
+		// get DOM element of guessed letter
+		charElement = document.getElementById(`char-${char}`);
+		// remove click listener from element
+		charElement.removeEventListener("click", hangmanGame.letterClicked);
+	}
 
 	checkGuess: function(guess) {
 		// function that's called when a user makes a guess
