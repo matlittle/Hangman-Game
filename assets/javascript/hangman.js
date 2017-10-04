@@ -20,7 +20,7 @@ var hangmanGame = {
 		wordToGuess: "",
 		displayWord: "",
 		numGuesses: 0,
-		currGuess: "",
+		currentGuess: "",
 		correctGuess: {
 			char: "",
 			positions: [],
@@ -56,7 +56,7 @@ var hangmanGame = {
 	gameType: function() {
 		// determines whether the game is vs computer or human
 		// let typePrompt = confirm("Are you playing with another person?");
-		let typePrompt = false; // <-------------------------------------- Just false for testing purposes
+		var typePrompt = false; // <-------------------------------------- Just false for testing purposes
 		if(typePrompt) {
 			this.curr.gameType = "vsHuman"
 		} else {
@@ -70,9 +70,9 @@ var hangmanGame = {
 		// function to get word. Random if vs comp, input if pvp.
 		if(this.curr.gameType === "vsComputer") {
 			// set random word length betweeen 4 and 12
-			let ranWordLen = (Math.floor(Math.random() * 9) + 4);
+			var ranWordLen = (Math.floor(Math.random() * 9) + 4);
 			// initialize new http request variable
-			let xhttpReq = new XMLHttpRequest();
+			var xhttpReq = new XMLHttpRequest();
 
 			// configure GET request from random word generator.
 			xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=${ranWordLen.toString()}", false);
@@ -83,17 +83,22 @@ var hangmanGame = {
 
 		} else {
 			// ask player for input word
-			let playerWord = "";
-			do {
-				playerWord = prompt("Enter a word between 4 and 12 characters for the next game.");
-			} while (playerWord.length < 4 || playerWord.length > 12)
+			var playerWord = this.getPlayerWord();
 
 			return playerWord.toUpperCase;
 		}
 	},
 
+	getPlayerWord: function() {
+		var input = "";
+		do {
+			input = prompt("Enter a word between 4 and 12 characters for the next game.");
+		} while (input.length < 4 || input.length > 12)
+		return input;
+	},
+
 	initDisplayWord: function(word) {
-		let tempWord = "";
+		var tempWord = "";
 
 		for (var i = 0; i < word.length; i += 1) {
 			tempWord += "_";
@@ -193,24 +198,28 @@ var hangmanGame = {
 			this.curr.numGuesses += 1;
 			return false;
 		} else {
-			// set return obj array to empty array
-			this.curr.correctGuess.positions = [];
-			// loop through correct word, building array of correct index locations
-			for(var i = 0; i < this.curr.wordToGuess.length; i += 1){
-				if(guess === this.curr.wordToGuess[i]){
-					// add location of correct guess to obj index array
-					this.curr.correctGuess.positions.push(i);
-				}
-			}
-			// add correct character to correct guess obj
-			this.curr.correctGuess.char = guess;
+			this.updateCorrectGuess(guess);
 			return true;
 		}
 	},
 
+	updateCorrectGuess: function(char) {
+		// set return obj array to empty array
+		this.curr.correctGuess.positions = [];
+		// loop through correct word, building array of correct index locations
+		for(var i = 0; i < this.curr.wordToGuess.length; i += 1){
+			if(char === this.curr.wordToGuess[i]){
+				// add location of correct guess to obj index array
+				this.curr.correctGuess.positions.push(i);
+			}
+		}
+		// add correct character to correct guess obj
+		this.curr.correctGuess.char = guess;
+	}, 
+
 	updateDisplayWord: function(obj) {
 		//function gets passed this.curr.correctGuess obj
-		let tempWord = hangmanGame.curr.displayWord;
+		var tempWord = hangmanGame.curr.displayWord;
 		// go through each correct position
 		obj.positions.forEach(function(index) {
 			// update display word with correct character
