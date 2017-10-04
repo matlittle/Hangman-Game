@@ -69,23 +69,14 @@ var hangmanGame = {
 	chooseWord: function() {
 		// function to get word. Random if vs comp, input if pvp.
 		if(this.curr.gameType === "vsComputer") {
-			// set random word length betweeen 4 and 12
-			var ranWordLen = (Math.floor(Math.random() * 9) + 4);
-			// initialize new http request variable
-			var xhttpReq = new XMLHttpRequest();
-
-			// configure GET request from random word generator.
-			xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=${ranWordLen.toString()}", false);
-			// make web service call
-			xhttpReq.send();
-
-			return xhttpReq.responseText.toUpperCase();
+			// get random word
+			var randomWord = this.getRandomWord();
+			return randomWord;
 
 		} else {
 			// ask player for input word
 			var playerWord = this.getPlayerWord();
-
-			return playerWord.toUpperCase;
+			return playerWord;
 		}
 	},
 
@@ -94,7 +85,21 @@ var hangmanGame = {
 		do {
 			input = prompt("Enter a word between 4 and 12 characters for the next game.");
 		} while (input.length < 4 || input.length > 12)
-		return input;
+		return input.toUpperCase();
+	},
+
+	getRandomWord: function() {
+		// set random word length betweeen 4 and 12
+		var ranWordLen = (Math.floor(Math.random() * 9) + 4);
+		// initialize new http request variable
+		var xhttpReq = new XMLHttpRequest();
+
+		// configure GET request from random word generator.
+		xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=${ranWordLen.toString()}", false);
+		// make web service call
+		xhttpReq.send();
+
+		return xhttpReq.responseText.toUpperCase();
 	},
 
 	initDisplayWord: function(word) {
