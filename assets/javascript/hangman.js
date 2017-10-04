@@ -47,7 +47,6 @@ var hangmanGame = {
 
 		// add click event listener to alphabet letter elements
 		var letterElements = document.getElementsByClassName("letter");
-		console.log(letterElements);
 		for(var i = 0; i < letterElements.length; i += 1) {
 			letterElements[i].addEventListener("click", hangmanGame.letterClicked);
 		}
@@ -76,8 +75,7 @@ var hangmanGame = {
 			let xhttpReq = new XMLHttpRequest();
 
 			// configure GET request from random word generator.
-			xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=" + 
-				ranWordLen.toString(), false);
+			xhttpReq.open("GET", "http://randomword.setgetgo.com/randomword/get.php?len=${ranWordLen.toString()}", false);
 			// make web service call
 			xhttpReq.send();
 
@@ -156,8 +154,36 @@ var hangmanGame = {
 			console.log(hangmanGame.curr.numGuesses);
 		}
 		return;
+	},
 
+	letterPressed: function(event) {
+		// set current guess to value of clicked letter
+		hangmanGame.curr.currentGuess = event.key;
 
+		// if guess is correct
+		if(hangmanGame.checkGuess(hangmanGame.curr.currentGuess)) {
+			// remove click event listener from element
+			event.target.removeEventListener("click", hangmanGame.letterClicked);
+			// set class of clicked element to correct
+			event.target.className = "correct";
+			// update display word with correctly guessed character
+			hangmanGame.updateDisplayWord(hangmanGame.curr.correctGuess);
+			// update display elements
+			hangmanGame.updateDisplay();
+
+			console.log(hangmanGame.curr.numGuesses);
+
+		} else {
+			// remove click event listener from element
+			event.target.removeEventListener("click", hangmanGame.letterClicked);
+			// set class of clicked element to wrong
+			event.target.className = "wrong";
+			// update display elements
+			hangmanGame.updateDisplay();
+
+			console.log(hangmanGame.curr.numGuesses);
+		}
+		return;
 	},
 
 	checkGuess: function(guess) {
@@ -211,45 +237,10 @@ window.onload = function() {
 
 	hangmanGame.init();
 
+	document.onkeyup = hangmanGame.letterPressed();
+
 	console.log(hangmanGame.curr.wordToGuess);
 
-
-	/*document.onclick = function(event) {
-
-		console.log(event.target);
-		console.log(event.target.className);
-
-		// if the class is letter for the clicked element
-		if(event.target.className === "letter") {
-			// set current guess to clicked elements value
-			hangmanGame.curr.currentGuess = event.target.innerHTML;
-			// if guess is correct
-			if(hangmanGame.checkGuess(hangmanGame.curr.currentGuess)) {
-				// set class of clicked element to correct
-				event.target.className = "correct";
-				// update display word with correctly guessed character
-				hangmanGame.updateDisplayWord(hangmanGame.curr.correctGuess);
-				// update display elements
-				hangmanGame.updateDisplay();
-
-				console.log(hangmanGame.curr.numGuesses);
-
-			} else {
-				// set class of clicked element to wrong
-				event.target.className = "wrong";
-				// update display elements
-				hangmanGame.updateDisplay();
-
-				console.log(hangmanGame.curr.numGuesses);
-			}
-			return;
-
-		// if the target element does not have a class of letter, do nothing
-		} else {
-			return;
-		}
-
-	}	*/
 
 }
 
