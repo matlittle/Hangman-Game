@@ -28,7 +28,7 @@ var hangmanGame = {
 		displayWord: "",
 		numGuesses: 0,
 		currentGuess: "",
-		missedGuesses: [],
+		prevGuesses: [],
 		correctGuess: {
 			char: "",
 			positions: [],
@@ -66,7 +66,7 @@ var hangmanGame = {
 
 		document.onkeyup = function() {
 			hangmanGame.letterPressed(event);
-		}
+		};
 	},
 
 	toggleModal: function() {
@@ -88,6 +88,9 @@ var hangmanGame = {
 			newText = "You won!!!<br>Press any key to start the next round"
 		} else if(state === "loss") {
 			newText = "You lost...<br>Press any key to start the next round"
+		} else if(state === "type") {
+			newText = "Which game type would you like to play?<br>"+
+					"<button id='player'>vs Player</button><button id='comp'>vs Computer</button>";
 		}
 
 		this.Settings.ModalTextElement.innerHTML = newText;
@@ -96,7 +99,10 @@ var hangmanGame = {
 	gameType: function() {
 		// determines whether the game is vs computer or human
 		// let typePrompt = confirm("Are you playing with another person?");
-		var typePrompt = false; // <-------------------------------------- Just false for testing purposes
+
+		changeModalContent("type");
+		toggleModal();
+		
 		if(typePrompt) {
 			this.curr.gameType = "vsHuman"
 		} else {
@@ -206,6 +212,8 @@ var hangmanGame = {
 		this.curr.currentGuess = keyClicked;
 		//remove character's click listener
 		this.removeClickListener(keyClicked);
+		// add to previous guesses array
+		this.addPrevGuess(keyClicked);
 
 		// if guess is correct
 		if(this.checkGuess(keyClicked)) {
@@ -221,7 +229,7 @@ var hangmanGame = {
 
 		var alphaKeys = /^[a-z]+$/i;
 
-		if(!alphaKeys.test(keyPressed)) {
+		if(hangmanGame.curr.prevGuesses.indexOf(keyPressed) !== -1 || !alphaKeys.test(keyPressed)) {
 			return;
 		}
 
@@ -229,6 +237,8 @@ var hangmanGame = {
 		hangmanGame.curr.currentGuess = keyPressed;
 		//remove character's click listener
 		hangmanGame.removeClickListener(keyPressed);
+		// add to previous guesses array
+		hangmanGame.addPrevGuess(keyPressed);
 
 		// if guess is correct
 		if(hangmanGame.checkGuess(keyPressed)) {
@@ -243,6 +253,11 @@ var hangmanGame = {
 		var charElement = this.getCharElement(char);
 		// remove click listener from element
 		charElement.removeEventListener("click", this.letterClicked);
+	},
+
+	addPrevGuess: function(char) {
+		// add character to prev guess array
+		this.curr.prevGuesses.push(char);
 	},
 
 	getCharElement: function(char) {
@@ -385,6 +400,11 @@ var hangmanGame = {
 		// build the initial display word
 		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
 
+		this.curr.prevGuesses = [];
+
+		this.curr.numGuesses = 0;
+
+		this.updateDisplayImg();
 
 		this.resetAlphaDisplay();
 
@@ -403,8 +423,6 @@ var hangmanGame = {
 window.onload = function() {
 
 	hangmanGame.init();
-
-	
 
 }
 
