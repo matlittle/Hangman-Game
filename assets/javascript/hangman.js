@@ -1,3 +1,5 @@
+
+
 var hangmanGame = {
 	Settings: {
 		// constant game settings
@@ -5,12 +7,14 @@ var hangmanGame = {
 			["A","B","C","D","E","F","G"],
 			["H","I","J","K","L","M","N"],
 			["O","P","Q","R","S","T","U"],
-			["V","W","X","Y","Z"]
+			[" ","V","W","X","Y","Z"," "]
 		],
 		MaxGuesses: 6,
 		WordElement: document.getElementById("wordToGuess"),
 		AlphabetDiv: document.getElementById("alphabet"),
-		ImgElement: document.getElementById("gameImg")
+		ImgElement: document.getElementById("gameImg"),
+		ModalElement: document.getElementById('myModal'),
+		ModalTextElement: document.getElementById('modalText')
 	},
 
 	curr: {
@@ -33,6 +37,17 @@ var hangmanGame = {
 		// freeze Settings obj so no changes can be made
 		Object.freeze(this.Settings);
 
+		this.buildAlphaDisplay(this.Settings.Alphabet);
+
+		this.Settings.ModalElement.style.display = "block";
+
+		document.onkeyup = function() {
+			hangmanGame.Settings.ModalElement.style.display = "none";
+			hangmanGame.startGame();
+		}
+	},
+
+	startGame: function() {
 		// get the game type
 		this.gameType();
 
@@ -43,13 +58,21 @@ var hangmanGame = {
 		// build the initial display word
 		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
 
-		// build the alphabet display
-		this.buildAlphaDisplay(this.Settings.Alphabet);
-
 		// add click event listener to alphabet letter elements
 		this.createClickListeners();
 
-		document.onkeyup = this.letterPressed;
+		document.onkeyup = function() {
+			hangmanGame.letterPressed(event);
+		}
+	},
+
+	toggleModal: function() {
+		var modalDisplay = this.Settings.ModalElement.style.display;
+		if(modalDisplay === "none") {
+			this.Settings.ModalElement.style.display === "none"
+		} else {
+
+		}
 	},
 
 	gameType: function() {
@@ -124,7 +147,9 @@ var hangmanGame = {
 				cell.appendChild(document.createTextNode(cellData));
 				// set class and id of td elements
 				cell.className = "letter";
-				cell.id = `char-${cellData}`;
+				if(cellData !== " ") {
+					cell.id = `char-${cellData}`;
+				};
 				// append td element to the row
 				row.appendChild(cell);
 			});
@@ -139,23 +164,29 @@ var hangmanGame = {
 	createClickListeners: function() {
 		var letterElements = document.getElementsByClassName("letter");
 		for(var i = 0; i < letterElements.length; i += 1) {
-			letterElements[i].addEventListener("click", hangmanGame.letterClicked);
+			letterElements[i].addEventListener("click", function() {
+				hangmanGame.letterClicked(event);
+			});
 		}
 	},
 
 	letterClicked: function(event) {
 		var keyClicked = event.target.innerHTML.toUpperCase();
 
+		if(keyClicked === " ") {
+			return;
+		}
+
 		// set current guess to value of clicked letter
-		hangmanGame.curr.currentGuess = keyClicked;
+		this.curr.currentGuess = keyClicked;
 		//remove character's click listener
-		hangmanGame.removeClickListener(keyClicked);
+		this.removeClickListener(keyClicked);
 
 		// if guess is correct
-		if(hangmanGame.checkGuess(keyClicked)) {
-			hangmanGame.updateCorrectGuess(keyClicked);
+		if(this.checkGuess(keyClicked)) {
+			this.updateCorrectGuess(keyClicked);
 		} else {
-			hangmanGame.updateWrongGuess(keyClicked);
+			this.updateWrongGuess(keyClicked);
 		}
 		return;
 	},
@@ -208,7 +239,6 @@ var hangmanGame = {
 		this.updateDisplay(false);
 	},
 
-
 	updateCorrectGuess: function(char) {
 		// add correct character to correct guess obj
 		this.curr.correctGuess.char = char;
@@ -236,7 +266,6 @@ var hangmanGame = {
 		});
 
 		this.curr.displayWord = tempWord;
-
 	},
 
 	updateDisplayImg: function() {
@@ -298,8 +327,9 @@ var hangmanGame = {
 		alert("won");
 	}, 
 
-	nextLevel() {
+	nextLevel: function() {
 		// reset game
+		//
 	}
 };
 
@@ -308,7 +338,7 @@ window.onload = function() {
 
 	hangmanGame.init();
 
+	
+
 }
-
-
 
