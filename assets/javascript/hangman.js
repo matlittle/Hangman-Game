@@ -9,7 +9,8 @@ var hangmanGame = {
 		],
 		MaxGuesses: 6,
 		WordElement: document.getElementById("wordToGuess"),
-		AlphabetDiv: document.getElementById("alphabet")
+		AlphabetDiv: document.getElementById("alphabet"),
+		ImgElement: document.getElementById("gameImg")
 	},
 
 	curr: {
@@ -85,8 +86,8 @@ var hangmanGame = {
 	},
 
 	getRandomWord: function() {
-		// set random word length betweeen 4 and 12
-		var ranWordLen = (Math.floor(Math.random() * 9) + 4);
+		// set random word length betweeen 4 and 10
+		var ranWordLen = (Math.floor(Math.random() * 7) + 4);
 		// initialize new http request variable
 		var xhttpReq = new XMLHttpRequest();
 		// configure GET request from random word generator.
@@ -200,29 +201,11 @@ var hangmanGame = {
 		}
 	},
 
-	checkNumGuesses: function() {
-		if(this.curr.numGuesses >= 6) {
-			this.lostGame();
-		}
-	},
-
-	checkWin: function() {
-		if(this.curr.displayWord.indexOf("_") === -1) {
-			this.wonGame();
-		}
-	},
-
 	updateWrongGuess: function(char){
 		// incorrect guess, increment incorrect guesses by 1
 		this.curr.numGuesses += 1;
 
-		// change letter element class to wrong
-		var charElement = this.getCharElement(char);
-		charElement.className = "wrong";
-
-		if(this.updateDisplay()) {
-			this.checkNumGuesses();
-		}
+		this.updateDisplay(false);
 	},
 
 
@@ -240,12 +223,7 @@ var hangmanGame = {
 			}
 		}
 
-		var charElement = this.getCharElement(char);
-		charElement.className = "correct";
-
-		if(this.updateDisplay()) {
-			this.checkWin();
-		}
+		this.updateDisplay(true);
 	}, 
 
 	updateDisplayWord: function(obj) {
@@ -261,20 +239,52 @@ var hangmanGame = {
 
 	},
 
-	updateDisplay: function() {
+	updateDisplayImg: function() {
+		gameState = this.curr.numGuesses;
+		this.Settings.ImgElement.src = `assets/images/game_state_${gameState}.png`
+	},
+
+	updateCharElement: function(bool, char) {
+		var charElement = this.getCharElement(char);
+
+		if(bool) {
+			charElement.style.backgroundColor = "green";
+		} else {
+			charElement.style.backgroundColor = "red";
+		}
+
+		charElement.style.color = "white";
+	},
+
+	updateDisplay: function(bool) {
 		// function to update display based on any changes
+		// if bool is true - correct guess, false - wrong guess
 
-		// update displayed image
-		//code;
-		// update display word with correctly guessed character
-		this.updateDisplayWord(this.curr.correctGuess);
-		// update displayed word
-		this.Settings.WordElement.innerHTML = this.curr.displayWord;
-		// update alphabet
-		//code;
+		if(bool) {
+			// update display word with correctly guessed character
+			this.updateDisplayWord(this.curr.correctGuess);
+			// update displayed word
+			this.Settings.WordElement.innerHTML = this.curr.displayWord;
+			// update alphabet
+			this.updateCharElement(true, this.curr.currentGuess);
+		} else {
+			// update alphabet
+			this.updateCharElement(false, this.curr.currentGuess);
+			// update displayed image
+			this.updateDisplayImg();
+		}
 
-		return true;
+		setTimeout(this.checkWinOrLoss, 100);
 	}, 
+
+	checkWinOrLoss: function() {
+		if(hangmanGame.curr.displayWord.indexOf("_") === -1) {
+			hangmanGame.wonGame();
+		}
+		if(hangmanGame.curr.numGuesses >= 6) {
+			hangmanGame.lostGame();
+		}
+	},
 
 	lostGame: function() {
 		// display game over, ask if they want to restart

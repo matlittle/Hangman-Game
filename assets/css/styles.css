@@ -2,14 +2,44 @@ body {
 	font-family: 'Cousine', monospace;
 }
 
-div {
+/*div {
 	padding: 10px 0px;
 	margin: 10px 0px;
 	border: 2px solid black;
+}*/
+
+#title {
+	text-align: center;
+	letter-spacing: .5em;
 }
 
-#gameImg {
+#gamePanel div {
+	padding: 10px 0px;
+}
+
+#sidePanel div {
+	padding: 20px 0px;
+}
+
+#imgDiv {
 	text-align: center;
+}
+
+#instructions {
+	text-align: center;
+}
+
+#scoreboard h4 {
+	text-align: center;
+}
+
+#scoreCounts {
+	width: 50%;
+	margin: auto;
+}
+
+#winCount, #lossCount {
+	text-align: right;
 }
 
 #alphabet > table{
@@ -30,18 +60,8 @@ div {
 #wordToGuess {
 	font-size: 2em;
 	line-height: 2em;
-	letter-spacing: 1.1em;
-	text-indent: 1.1em;
+	letter-spacing: .8em;
+	text-indent: .8em;
 	text-align: center;
 	display: block;
-}
-
-.correct {
-	background-color: green;
-	color: white;
-}
-
-.wrong {
-	background-color: red;
-	color: white;
 }
