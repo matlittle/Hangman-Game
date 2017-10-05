@@ -13,8 +13,10 @@ var hangmanGame = {
 		WordElement: document.getElementById("wordToGuess"),
 		AlphabetDiv: document.getElementById("alphabet"),
 		ImgElement: document.getElementById("gameImg"),
-		ModalElement: document.getElementById('myModal'),
-		ModalTextElement: document.getElementById('modalText')
+		ModalElement: document.getElementById("myModal"),
+		ModalTextElement: document.getElementById("modalText"),
+		LossCountElement: document.getElementById("lossCount"),
+		WinCountElement: document.getElementById("winCount")
 	},
 
 	curr: {
@@ -26,6 +28,7 @@ var hangmanGame = {
 		displayWord: "",
 		numGuesses: 0,
 		currentGuess: "",
+		missedGuesses: [],
 		correctGuess: {
 			char: "",
 			positions: [],
@@ -44,7 +47,7 @@ var hangmanGame = {
 		document.onkeyup = function() {
 			hangmanGame.toggleModal();
 			hangmanGame.startGame();
-		}
+			}
 	},
 
 	startGame: function() {
@@ -82,13 +85,13 @@ var hangmanGame = {
 		var newText = "";
 
 		if(state === "win") {
-			newText = ""
+			newText = "You won!!!<br>Press any key to start the next round"
 		} else if(state === "loss") {
-
+			newText = "You lost...<br>Press any key to start the next round"
 		}
 
-		this.Settings.ModalTextElement.innerHTML = 
-	}
+		this.Settings.ModalTextElement.innerHTML = newText;
+	},
 
 	gameType: function() {
 		// determines whether the game is vs computer or human
@@ -143,6 +146,7 @@ var hangmanGame = {
 			tempWord += "_";
 		}
 
+		this.Settings.WordElement.innerHTML = "";
 		// append the display word to its html element
 		this.Settings.WordElement.appendChild(document.createTextNode(tempWord));
 
@@ -174,6 +178,12 @@ var hangmanGame = {
 
 		// append fully constructed table to alphabet div
 		this.Settings.AlphabetDiv.appendChild(table);
+	},
+
+	resetAlphaDisplay: function() {
+		this.Settings.AlphabetDiv.innerHTML = "";
+
+		this.buildAlphaDisplay(this.Settings.Alphabet);
 	},
 
 	createClickListeners: function() {
@@ -210,6 +220,7 @@ var hangmanGame = {
 		var keyPressed = event.key.toUpperCase();
 
 		var alphaKeys = /^[a-z]+$/i;
+
 		if(!alphaKeys.test(keyPressed)) {
 			return;
 		}
@@ -323,9 +334,11 @@ var hangmanGame = {
 
 	checkWinOrLoss: function() {
 		if(hangmanGame.curr.displayWord.indexOf("_") === -1) {
+			document.onkeyup = function() {};
 			hangmanGame.wonGame();
 		}
 		if(hangmanGame.curr.numGuesses >= 6) {
+			document.onkeyup = function() {};
 			hangmanGame.lostGame();
 		}
 	},
@@ -333,18 +346,56 @@ var hangmanGame = {
 	lostGame: function() {
 		// display game over, ask if they want to restart
 		this.curr.losses += 1;
-		alert("lost");
+
+		this.updateScore();
+
+		this.changeModalContent("loss");
+		this.toggleModal();
+
+		document.onkeyup = function() {
+			hangmanGame.newRound();
+		}
 	},
 
 	wonGame: function() {
 		// display won game, start new level
 		this.curr.wins += 1;
-		alert("won");
+
+		this.updateScore();
+		
+		this.changeModalContent("win");
+		this.toggleModal();
+
+		document.onkeyup = function() {
+			hangmanGame.newRound();
+		}
 	}, 
 
-	nextLevel: function() {
+	updateScore: function() {
+		this.Settings.LossCountElement.innerHTML = this.curr.losses;
+		this.Settings.WinCountElement.innerHTML = this.curr.wins;
+	},
+
+	newRound: function() {
 		// reset game
-		//
+		// get a word
+		this.curr.wordToGuess = this.chooseWord();
+		console.log(`wordToGuess: ${this.curr.wordToGuess}`);
+
+		// build the initial display word
+		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
+
+
+		this.resetAlphaDisplay();
+
+		// add click event listener to alphabet letter elements
+		this.createClickListeners();
+
+		this.toggleModal();
+
+		document.onkeyup = function() {
+			hangmanGame.letterPressed(event);
+		}
 	}
 };
 
