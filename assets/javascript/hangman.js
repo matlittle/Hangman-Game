@@ -37,6 +37,7 @@ var hangmanGame = {
 
 		// get a word
 		this.curr.wordToGuess = this.chooseWord();
+		console.log(`wordToGuess: ${this.curr.wordToGuess}`);
 
 		// build the initial display word
 		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
@@ -150,23 +151,10 @@ var hangmanGame = {
 		hangmanGame.removeClickListener(keyClicked);
 
 		// if guess is correct
-		if(hangmanGame.checkGuess(hangmanGame.curr.currentGuess)) {
-			// set class of clicked element to correct
-			event.target.className = "correct";
-			// update display word with correctly guessed character
-			hangmanGame.updateDisplayWord(hangmanGame.curr.correctGuess);
-			// update display elements
-			hangmanGame.updateDisplay();
-
-			console.log(hangmanGame.curr.numGuesses);
-
+		if(hangmanGame.checkGuess(keyClicked)) {
+			hangmanGame.updateCorrectGuess(keyClicked);
 		} else {
-			// set class of clicked element to wrong
-			event.target.className = "wrong";
-			// update display elements
-			hangmanGame.updateDisplay();
-
-			console.log(hangmanGame.curr.numGuesses);
+			hangmanGame.updateWrongGuess(keyClicked);
 		}
 		return;
 	},
@@ -174,9 +162,8 @@ var hangmanGame = {
 	letterPressed: function(event) {
 		var keyPressed = event.key.toUpperCase();
 
-		console.log(keyPressed);
-
-		if(keyPressed === /^[A-Z]+$/) {
+		var alphaKeys = /^[a-z]+$/i;
+		if(!alphaKeys.test(keyPressed)) {
 			return;
 		}
 
@@ -191,7 +178,6 @@ var hangmanGame = {
 		} else {
 			hangmanGame.updateWrongGuess(keyPressed);
 		}
-		return;
 	},
 
 	removeClickListener: function(char) {
@@ -207,21 +193,38 @@ var hangmanGame = {
 	},
 
 	checkGuess: function(guess) {
-		if(this.curr.wordToGuess.indexOf(guess) === -1) {
-			return false;
-		} else {
+		if(this.curr.wordToGuess.indexOf(guess) !== -1) {
 			return true;
+		} else {
+			return false;
+		}
+	},
+
+	checkNumGuesses: function() {
+		if(this.curr.numGuesses >= 6) {
+			this.lostGame();
+		}
+	},
+
+	checkWin: function() {
+		if(this.curr.displayWord.indexOf("_") === -1) {
+			this.wonGame();
 		}
 	},
 
 	updateWrongGuess: function(char){
 		// incorrect guess, increment incorrect guesses by 1
 		this.curr.numGuesses += 1;
+
 		// change letter element class to wrong
 		var charElement = this.getCharElement(char);
 		charElement.className = "wrong";
-		this.updateDisplay();
+
+		if(this.updateDisplay()) {
+			this.checkNumGuesses();
+		}
 	},
+
 
 	updateCorrectGuess: function(char) {
 		// add correct character to correct guess obj
@@ -239,22 +242,23 @@ var hangmanGame = {
 
 		var charElement = this.getCharElement(char);
 		charElement.className = "correct";
-		this.updateDisplay();
 
-		// update display word with correctly guessed character
-		hangmanGame.updateDisplayWord(hangmanGame.curr.correctGuess);
+		if(this.updateDisplay()) {
+			this.checkWin();
+		}
 	}, 
 
 	updateDisplayWord: function(obj) {
 		//function gets passed this.curr.correctGuess obj
-		var tempWord = hangmanGame.curr.displayWord;
+		var tempWord = this.curr.displayWord;
 		// go through each correct position
 		obj.positions.forEach(function(index) {
 			// update display word with correct character
 			tempWord = tempWord.substring(0, index) + obj.char + tempWord.substring(index+1);
 		});
 
-		hangmanGame.curr.displayWord = tempWord;
+		this.curr.displayWord = tempWord;
+
 	},
 
 	updateDisplay: function() {
@@ -262,10 +266,30 @@ var hangmanGame = {
 
 		// update displayed image
 		//code;
+		// update display word with correctly guessed character
+		this.updateDisplayWord(this.curr.correctGuess);
 		// update displayed word
 		this.Settings.WordElement.innerHTML = this.curr.displayWord;
 		// update alphabet
 		//code;
+
+		return true;
+	}, 
+
+	lostGame: function() {
+		// display game over, ask if they want to restart
+		this.curr.losses += 1;
+		alert("lost");
+	},
+
+	wonGame: function() {
+		// display won game, start new level
+		this.curr.wins += 1;
+		alert("won");
+	}, 
+
+	nextLevel() {
+		// reset game
 	}
 };
 
