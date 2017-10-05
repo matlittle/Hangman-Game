@@ -42,7 +42,7 @@ var hangmanGame = {
 		this.Settings.ModalElement.style.display = "block";
 
 		document.onkeyup = function() {
-			hangmanGame.Settings.ModalElement.style.display = "none";
+			hangmanGame.toggleModal();
 			hangmanGame.startGame();
 		}
 	},
@@ -68,12 +68,27 @@ var hangmanGame = {
 
 	toggleModal: function() {
 		var modalDisplay = this.Settings.ModalElement.style.display;
+
 		if(modalDisplay === "none") {
-			this.Settings.ModalElement.style.display === "none"
+			modalDisplay = "block";
 		} else {
+			modalDisplay = "none";
+		}
+
+		this.Settings.ModalElement.style.display = modalDisplay;
+	},
+
+	changeModalContent: function(state) {
+		var newText = "";
+
+		if(state === "win") {
+			newText = ""
+		} else if(state === "loss") {
 
 		}
-	},
+
+		this.Settings.ModalTextElement.innerHTML = 
+	}
 
 	gameType: function() {
 		// determines whether the game is vs computer or human
