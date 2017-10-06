@@ -47,12 +47,12 @@ var hangmanGame = {
 		document.onkeyup = function() {
 			hangmanGame.toggleModal();
 			hangmanGame.startGame();
-			}
+		}
 	},
 
 	startGame: function() {
 		// get the game type
-		this.gameType();
+		this.gameTypePrompt();
 
 		// get a word
 		this.curr.wordToGuess = this.chooseWord();
@@ -85,29 +85,42 @@ var hangmanGame = {
 		var newText = "";
 
 		if(state === "win") {
-			newText = "You won!!!<br>Press any key to start the next round"
+			newText = "<p>You won!!!<br>Press any key to start the next round</p>";
 		} else if(state === "loss") {
-			newText = "You lost...<br>Press any key to start the next round"
+			newText = "<p>You lost...<br>Press any key to start the next round</p>";
 		} else if(state === "type") {
-			newText = "Which game type would you like to play?<br>"+
-					"<button id='player'>vs Player</button><button id='comp'>vs Computer</button>";
+			newText = "<p>Which game type would you like to play?</p>"+
+					"<button id='playerBtn'>vs Player</button><button id='compBtn'>vs Computer</button>";
 		}
 
 		this.Settings.ModalTextElement.innerHTML = newText;
 	},
 
-	gameType: function() {
-		// determines whether the game is vs computer or human
-		// let typePrompt = confirm("Are you playing with another person?");
+	gameTypePrompt: function() {
+		this.changeModalContent("type");
+		this.toggleModal();
+	},
 
-		changeModalContent("type");
-		toggleModal();
-		
-		if(typePrompt) {
+	gameType: function(bool) {
+		// determines whether the game is vs computer or human
+		if(bool) {
 			this.curr.gameType = "vsHuman"
 		} else {
 			this.curr.gameType = "vsComputer";
 		}
+	},
+
+	createTypeClickListeners: function() {
+		var playerBtn = document.getElementById("playerBtn");
+		var computerBtn = document.getElementById("compBtn");
+
+		playerBtn.addEventListener("click", function() {
+			hangmanGame.gameType(true);
+		});
+
+		compBtn.addEventListener("click", function() {
+			hangmanGame.gameType(false);
+		});
 	},
 
 	chooseWord: function() {

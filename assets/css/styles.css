@@ -88,3 +88,7 @@ body {
     width: 400px; /* Could be more or less, depending on screen size */
     text-align: center;
 }
+
+.modal-content > button {
+	margin: 10px 20px;
+}
