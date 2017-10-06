@@ -1,5 +1,4 @@
 
-
 var hangmanGame = {
 	Settings: {
 		// constant game settings
@@ -46,16 +45,12 @@ var hangmanGame = {
 
 		document.onkeyup = function() {
 			hangmanGame.toggleModal();
-			hangmanGame.startGame();
+			hangmanGame.gameTypePrompt();
 		}
 	},
 
 	startGame: function() {
-		// get the game type
-		this.gameTypePrompt();
 
-		// get a word
-		this.curr.wordToGuess = this.chooseWord();
 		console.log(`wordToGuess: ${this.curr.wordToGuess}`);
 
 		// build the initial display word
@@ -67,6 +62,26 @@ var hangmanGame = {
 		document.onkeyup = function() {
 			hangmanGame.letterPressed(event);
 		};
+	},
+
+	gameTypePrompt: function() {
+		document.onkeyup = function() {};
+		this.changeModalContent("type");
+		this.createTypeListeners();
+		this.toggleModal();
+	},
+
+	setGameType: function(bool) {
+		// determines whether the game is vs computer or human
+		if(bool) {
+			this.curr.gameType = "vsHuman"
+		} else {
+			this.curr.gameType = "vsComputer";
+		}
+
+		this.toggleModal();
+
+		this.chooseWord();
 	},
 
 	toggleModal: function() {
@@ -90,59 +105,76 @@ var hangmanGame = {
 			newText = "<p>You lost...<br>Press any key to start the next round</p>";
 		} else if(state === "type") {
 			newText = "<p>Which game type would you like to play?</p>"+
-					"<button id='playerBtn'>vs Player</button><button id='compBtn'>vs Computer</button>";
+					"<button id='playerBtn'>vs Player</button>"+
+					"<button id='compBtn'>vs Computer</button>";
+		} else if(state === "word") {
+			newText = "<p>Enter a word between 4 and 10 characters for the next game.</p>"+
+				"<input id='playerWord' type='text' maxlength='10' autofocus required>"+
+				"<button id='submitWord'>Submit</button>";
 		}
 
 		this.Settings.ModalTextElement.innerHTML = newText;
 	},
 
-	gameTypePrompt: function() {
-		this.changeModalContent("type");
-		this.toggleModal();
-	},
-
-	gameType: function(bool) {
-		// determines whether the game is vs computer or human
-		if(bool) {
-			this.curr.gameType = "vsHuman"
-		} else {
-			this.curr.gameType = "vsComputer";
-		}
-	},
-
-	createTypeClickListeners: function() {
+	createTypeListeners: function() {
 		var playerBtn = document.getElementById("playerBtn");
 		var computerBtn = document.getElementById("compBtn");
 
 		playerBtn.addEventListener("click", function() {
-			hangmanGame.gameType(true);
+			hangmanGame.setGameType(true);
 		});
 
 		compBtn.addEventListener("click", function() {
-			hangmanGame.gameType(false);
+			hangmanGame.setGameType(false);
 		});
+	},
+
+	createWordListeners: function() {
+		var submitWord = document.getElementById("submitWord");
+
+		submitWord.addEventListener("click", function() {
+			hangmanGame.getPlayerWord();
+		});
+
+		document.onkeyup = function(event) {
+			if(event.keyCode === 13) {
+				hangmanGame.getPlayerWord();
+			}
+		}
 	},
 
 	chooseWord: function() {
 		// function to get word. Random if vs comp, input if pvp.
 		if(this.curr.gameType === "vsComputer") {
 			// get random word
-			var randomWord = this.getRandomWord();
-			return randomWord;
-
+			this.curr.wordToGuess = this.getRandomWord();
+			console.log(this.curr.wordToGuess);
+			this.startGame();
 		} else {
 			// ask player for input word
-			var playerWord = this.getPlayerWord();
-			return playerWord;
+			this.promptPlayerWord();
 		}
 	},
 
+	promptPlayerWord: function() {
+		this.changeModalContent("word");
+		this.createWordListeners();
+		this.toggleModal();
+		document.getElementById("playerWord").focus();
+	},
+
 	getPlayerWord: function() {
-		var input = "";
-		do {
-			input = prompt("Enter a word between 4 and 12 characters for the next game.");
-		} while (input.length < 4 || input.length > 12)
-		return input.toUpperCase();
+		var inputWord = document.getElementById("playerWord").value;
+
+		if(inputWord.length < 4) {
+			this.toggleModal();
+			this.promptPlayerWord();
+			return;
+		}
+
+		this.curr.wordToGuess = inputWord.toUpperCase();
+		this.toggleModal();
+		this.startGame();
 	},
 
 	getRandomWord: function() {
@@ -221,43 +253,34 @@ var hangmanGame = {
 			return;
 		}
 
-		// set current guess to value of clicked letter
-		this.curr.currentGuess = keyClicked;
-		//remove character's click listener
-		this.removeClickListener(keyClicked);
-		// add to previous guesses array
-		this.addPrevGuess(keyClicked);
-
-		// if guess is correct
-		if(this.checkGuess(keyClicked)) {
-			this.updateCorrectGuess(keyClicked);
-		} else {
-			this.updateWrongGuess(keyClicked);
-		}
-		return;
+		this.handleGuess(keyClicked);
 	},
 
 	letterPressed: function(event) {
 		var keyPressed = event.key.toUpperCase();
 
-		var alphaKeys = /^[a-z]+$/i;
+		var alphaKeys = /^[a-z]/i;
 
-		if(hangmanGame.curr.prevGuesses.indexOf(keyPressed) !== -1 || !alphaKeys.test(keyPressed)) {
-			return;
+		if(alphaKeys.test(keyPressed) && keyPressed.length === 1){
+			if(hangmanGame.curr.prevGuesses.indexOf(keyPressed) === -1) {
+				hangmanGame.handleGuess(keyPressed);
+			} 
 		}
+	},
 
-		// set current guess to value of pressed character
-		hangmanGame.curr.currentGuess = keyPressed;
+	handleGuess: function(char) {
+		// set current guess to value of clicked letter
+		this.curr.currentGuess = char;
 		//remove character's click listener
-		hangmanGame.removeClickListener(keyPressed);
+		this.removeClickListener(char);
 		// add to previous guesses array
-		hangmanGame.addPrevGuess(keyPressed);
+		this.addPrevGuess(char);
 
 		// if guess is correct
-		if(hangmanGame.checkGuess(keyPressed)) {
-			hangmanGame.updateCorrectGuess(keyPressed);
+		if(this.checkGuess(char)) {
+			this.updateCorrectGuess(char);
 		} else {
-			hangmanGame.updateWrongGuess(keyPressed);
+			this.updateWrongGuess(char);
 		}
 	},
 
@@ -288,8 +311,10 @@ var hangmanGame = {
 
 	updateWrongGuess: function(char){
 		// incorrect guess, increment incorrect guesses by 1
-		this.curr.numGuesses += 1;
-
+		if(this.curr.numGuesses < 6){
+			this.curr.numGuesses += 1;
+		}
+		
 		this.updateDisplay(false);
 	},
 
@@ -365,7 +390,7 @@ var hangmanGame = {
 			document.onkeyup = function() {};
 			hangmanGame.wonGame();
 		}
-		if(hangmanGame.curr.numGuesses >= 6) {
+		if(hangmanGame.curr.numGuesses === 6) {
 			document.onkeyup = function() {};
 			hangmanGame.lostGame();
 		}
@@ -406,12 +431,6 @@ var hangmanGame = {
 
 	newRound: function() {
 		// reset game
-		// get a word
-		this.curr.wordToGuess = this.chooseWord();
-		console.log(`wordToGuess: ${this.curr.wordToGuess}`);
-
-		// build the initial display word
-		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
 
 		this.curr.prevGuesses = [];
 
@@ -421,14 +440,10 @@ var hangmanGame = {
 
 		this.resetAlphaDisplay();
 
-		// add click event listener to alphabet letter elements
-		this.createClickListeners();
-
 		this.toggleModal();
 
-		document.onkeyup = function() {
-			hangmanGame.letterPressed(event);
-		}
+		// get a word
+		this.chooseWord();
 	}
 };
 
