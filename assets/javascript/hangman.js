@@ -215,8 +215,9 @@ var hangmanGame = {
 
 		if(!randArr){
 			this.getRandomWordArr();
+			return;
 		}
-		
+
 		var randNum = Math.floor(Math.random() * randArr.length);
 		var randWord = randArr[randNum];
 
@@ -321,7 +322,7 @@ var hangmanGame = {
 
 	removeClickListener: function(char) {
 		// get DOM element of guessed letter
-		var charElement = this.getCharElement(char);
+		var charElement = document.getElementById(`char-${char}`);
 		// remove click listener from element
 		charElement.removeEventListener("click", this.letterClicked);
 	},
@@ -329,11 +330,6 @@ var hangmanGame = {
 	addPrevGuess: function(char) {
 		// add character to prev guess array
 		this.curr.prevGuesses.push(char);
-	},
-
-	getCharElement: function(char) {
-		// 
-		return document.getElementById(`char-${char}`);
 	},
 
 	checkGuess: function(guess) {
@@ -388,7 +384,8 @@ var hangmanGame = {
 	},
 
 	updateCharElement: function(bool, char) {
-		var charElement = this.getCharElement(char);
+		// get DOM element of guessed letter
+		var charElement = document.getElementById(`char-${char}`);
 
 		if(bool) {
 			charElement.style.backgroundColor = "green";
@@ -417,7 +414,7 @@ var hangmanGame = {
 			this.updateDisplayImg();
 		}
 
-		setTimeout(this.checkWinOrLoss, 100);
+		this.checkWinOrLoss();
 	}, 
 
 	checkWinOrLoss: function() {
