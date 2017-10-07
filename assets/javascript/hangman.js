@@ -50,9 +50,6 @@ var hangmanGame = {
 	},
 
 	startGame: function() {
-
-		console.log(`wordToGuess: ${this.curr.wordToGuess}`);
-
 		// build the initial display word
 		this.curr.displayWord = this.initDisplayWord(this.curr.wordToGuess);
 
@@ -211,8 +208,6 @@ var hangmanGame = {
 	chooseRandomWord: function(str) {
 		var obj = JSON.parse(str);
 		var randArr = obj.results.data;
-
-		console.log(!randArr);
 
 		if(!randArr){
 			this.getRandomWordArr();
