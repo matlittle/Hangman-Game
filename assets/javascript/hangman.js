@@ -3,10 +3,10 @@ var hangmanGame = {
 	Settings: {
 		// constant game settings
 		Alphabet: [
-			["A","B","C","D","E","F","G"],
-			["H","I","J","K","L","M","N"],
-			["O","P","Q","R","S","T","U"],
-			[" ","V","W","X","Y","Z"," "]
+		["A","B","C","D","E","F","G"],
+		["H","I","J","K","L","M","N"],
+		["O","P","Q","R","S","T","U"],
+		[" ","V","W","X","Y","Z"," "]
 		],
 		MaxGuesses: 6,
 		WordElement: document.getElementById("wordToGuess"),
@@ -41,10 +41,10 @@ var hangmanGame = {
 
 		this.buildAlphaDisplay(this.Settings.Alphabet);
 
-		this.Settings.ModalElement.style.display = "block";
+		this.toggleModal(true);
 
 		document.onkeyup = function() {
-			hangmanGame.toggleModal();
+			hangmanGame.toggleModal(false);
 			hangmanGame.gameTypePrompt();
 		}
 	},
@@ -68,7 +68,7 @@ var hangmanGame = {
 		document.onkeyup = function() {};
 		this.changeModalContent("type");
 		this.createTypeListeners();
-		this.toggleModal();
+		this.toggleModal(true);
 	},
 
 	setGameType: function(bool) {
@@ -79,15 +79,14 @@ var hangmanGame = {
 			this.curr.gameType = "vsComputer";
 		}
 
-		this.toggleModal();
-
+		this.toggleModal(false);
 		this.chooseWord();
 	},
 
-	toggleModal: function() {
-		var modalDisplay = this.Settings.ModalElement.style.display;
+	toggleModal: function(bool) {
+		var modalDisplay;
 
-		if(modalDisplay === "none") {
+		if(bool) {
 			modalDisplay = "block";
 		} else {
 			modalDisplay = "none";
@@ -105,12 +104,15 @@ var hangmanGame = {
 			newText = "<p>You lost...<br>Press any key to start the next round</p>";
 		} else if(state === "type") {
 			newText = "<p>Which game type would you like to play?</p>"+
-					"<button id='playerBtn'>vs Player</button>"+
-					"<button id='compBtn'>vs Computer</button>";
+				"<button id='playerBtn'>vs Player</button>"+
+				"<button id='compBtn'>vs Computer</button>";
 		} else if(state === "word") {
 			newText = "<p>Enter a word between 4 and 10 characters for the next game.</p>"+
 				"<input id='playerWord' type='text' maxlength='10' autofocus required>"+
 				"<button id='submitWord'>Submit</button>";
+		} else if(state === "wait") {
+			newText = "<p>Generating a random word...</p><br>"+
+				"<img src='assets/images/loading.gif'>";
 		}
 
 		this.Settings.ModalTextElement.innerHTML = newText;
@@ -147,9 +149,7 @@ var hangmanGame = {
 		// function to get word. Random if vs comp, input if pvp.
 		if(this.curr.gameType === "vsComputer") {
 			// get random word
-			this.curr.wordToGuess = this.getRandomWord();
-			console.log(this.curr.wordToGuess);
-			this.startGame();
+			this.promptGeneratingWord();
 		} else {
 			// ask player for input word
 			this.promptPlayerWord();
@@ -159,7 +159,7 @@ var hangmanGame = {
 	promptPlayerWord: function() {
 		this.changeModalContent("word");
 		this.createWordListeners();
-		this.toggleModal();
+		this.toggleModal(true);
 		document.getElementById("playerWord").focus();
 	},
 
@@ -167,27 +167,62 @@ var hangmanGame = {
 		var inputWord = document.getElementById("playerWord").value;
 
 		if(inputWord.length < 4) {
-			this.toggleModal();
+			this.toggleModal(true);
 			this.promptPlayerWord();
 			return;
 		}
 
 		this.curr.wordToGuess = inputWord.toUpperCase();
-		this.toggleModal();
+		this.toggleModal(false);
 		this.startGame();
 	},
 
-	getRandomWord: function() {
-		// set random word length betweeen 4 and 10
-		var ranWordLen = (Math.floor(Math.random() * 7) + 4);
+	promptGeneratingWord: function() {
+		this.changeModalContent("wait");
+		this.toggleModal(true);
+		this.getRandomWordArr();
+	},
+
+	getRandomWordArr: function() {
+		var endURL = "https://wordsapiv1.p.mashape.com/words/";
+		var randChar = String.fromCharCode(Math.floor(Math.random() * 27) + 97);
+		var randLen = Math.floor(Math.random() * 6) + 4;
+
 		// initialize new http request variable
 		var xhttpReq = new XMLHttpRequest();
 		// configure GET request from random word generator.
-		xhttpReq.open("GET", `http://randomword.setgetgo.com/randomword/get.php?len=${ranWordLen.toString()}`, false);
+		xhttpReq.open("GET", 
+			`${endURL}?letterPattern=^${randChar}.{${randLen}}$&frequencyMin=3&limit=200`, 
+			true);
+		// set HTTP headers for request
+		xhttpReq.setRequestHeader("X-Mashape-Key",
+				"q4bESNa4dTmshLAQx5GNA4i2csGGp1AhjyUjsnMucLl8HYfsRp");
+		xhttpReq.setRequestHeader("Accept","application/json");
 		// make web service call
 		xhttpReq.send();
 
-		return xhttpReq.responseText.toUpperCase();
+		// function that's run on a request state change
+		xhttpReq.onreadystatechange = function() {
+			if(this.readyState === 4 && this.status === 200) {
+				hangmanGame.chooseRandomWord(this.response);
+			}
+		}
+	},
+
+	chooseRandomWord: function(str) {
+		var obj = JSON.parse(str);
+		var randArr = obj.results.data;
+
+		if(!randArr){
+			this.getRandomWordArr();
+		}
+		
+		var randNum = Math.floor(Math.random() * randArr.length);
+		var randWord = randArr[randNum];
+
+		this.curr.wordToGuess = randWord.toUpperCase();
+		this.toggleModal(false);
+		this.startGame();
 	},
 
 	initDisplayWord: function(word) {
@@ -403,7 +438,7 @@ var hangmanGame = {
 		this.updateScore();
 
 		this.changeModalContent("loss");
-		this.toggleModal();
+		this.toggleModal(true);
 
 		document.onkeyup = function() {
 			hangmanGame.newRound();
@@ -417,7 +452,7 @@ var hangmanGame = {
 		this.updateScore();
 		
 		this.changeModalContent("win");
-		this.toggleModal();
+		this.toggleModal(true);
 
 		document.onkeyup = function() {
 			hangmanGame.newRound();
@@ -431,7 +466,6 @@ var hangmanGame = {
 
 	newRound: function() {
 		// reset game
-
 		this.curr.prevGuesses = [];
 
 		this.curr.numGuesses = 0;
@@ -440,7 +474,7 @@ var hangmanGame = {
 
 		this.resetAlphaDisplay();
 
-		this.toggleModal();
+		this.toggleModal(true);
 
 		// get a word
 		this.chooseWord();
