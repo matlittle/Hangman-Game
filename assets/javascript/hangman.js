@@ -9,7 +9,7 @@ var hangmanGame = {
 		[" ","V","W","X","Y","Z"," "]
 		],
 		MaxGuesses: 6,
-		WordElement: document.getElementById("wordToGuess"),
+		WordElement: document.getElementById("displayWord"),
 		AlphabetDiv: document.getElementById("alphabet"),
 		ImgElement: document.getElementById("gameImg"),
 		ModalElement: document.getElementById("myModal"),
@@ -184,16 +184,15 @@ var hangmanGame = {
 	},
 
 	getRandomWordArr: function() {
-		var endURL = "https://wordsapiv1.p.mashape.com/words/";
 		var randChar = String.fromCharCode(Math.floor(Math.random() * 27) + 97);
-		var randLen = Math.floor(Math.random() * 6) + 4;
+		var randLen = Math.floor(Math.random() * 7) + 3;
+		var endURL = "https://wordsapiv1.p.mashape.com/words/";
+		var urlParams = `letterPattern=^${randChar}.{${randLen}}$&frequencyMin=3&limit=200`
 
 		// initialize new http request variable
 		var xhttpReq = new XMLHttpRequest();
 		// configure GET request from random word generator.
-		xhttpReq.open("GET", 
-			`${endURL}?letterPattern=^${randChar}.{${randLen}}$&frequencyMin=3&limit=200`, 
-			true);
+		xhttpReq.open("GET", `${endURL}?${urlParams}`, true);
 		// set HTTP headers for request
 		xhttpReq.setRequestHeader("X-Mashape-Key",
 				"q4bESNa4dTmshLAQx5GNA4i2csGGp1AhjyUjsnMucLl8HYfsRp");
@@ -212,6 +211,8 @@ var hangmanGame = {
 	chooseRandomWord: function(str) {
 		var obj = JSON.parse(str);
 		var randArr = obj.results.data;
+
+		console.log(!randArr);
 
 		if(!randArr){
 			this.getRandomWordArr();
@@ -432,6 +433,7 @@ var hangmanGame = {
 		// display game over, ask if they want to restart
 		this.curr.losses += 1;
 
+		this.Settings.WordElement.innerHTML = this.curr.wordToGuess;
 		this.updateScore();
 
 		this.changeModalContent("loss");

@@ -56,7 +56,7 @@ body {
 	border: 1px solid black;
 }
 
-#wordToGuess {
+#displayWord {
 	font-size: 2em;
 	line-height: 2em;
 	letter-spacing: .8em;
