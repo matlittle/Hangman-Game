@@ -482,8 +482,6 @@ var hangmanGame = {
 
 
 window.onload = function() {
-
 	hangmanGame.init();
-
 }
 
